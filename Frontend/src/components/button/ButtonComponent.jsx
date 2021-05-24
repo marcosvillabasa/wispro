@@ -30,7 +30,6 @@ ButtonComponent.propTypes = {
   variant: PropTypes.oneOf(['contained', 'outlined', 'text']),
   size: PropTypes.oneOf(['large', 'medium', 'small']),
   color: PropTypes.oneOf(['inherit', 'primary', 'secondary']),
-  children: PropTypes.string.isRequired,
   type: PropTypes.string,
 }
 

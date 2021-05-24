@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useFormik } from 'formik'
+import axios from 'axios'
 
-import { Box, Typography } from '@material-ui/core'
+import { Box, Typography, Button } from '@material-ui/core'
 
-import ButtonComponent from '../button/ButtonComponent'
 import TextInput from '../input/TextInput'
 
 const validate = values => {
@@ -26,35 +26,51 @@ const validate = values => {
   if (!values.domicilio) {
     errors.domicilio = 'domicilio es requerido'
   }
-  if (!values.contrasenia) {
-    errors.contrasenia = 'Contraseña es requerida'
-  } else if (values.contrasenia.length < 5) {
-    errors.contrasenia = 'Debe tener 5 caracteres'
+  if (!values.password) {
+    errors.password = 'Contraseña es requerida'
+  } else if (values.password.length < 5) {
+    errors.password = 'Debe tener 5 caracteres'
   }
 
   return errors
 }
 
-const FormCreate = () => {
+const FormCreate = ({ edit, user }) => {
   const formik = useFormik({
     initialValues: {
-      nombre: '',
-      apellido: '',
-      dni: '',
-      email: '',
-      contrasenia: '',
-      fechaAlta:'',
-      domicilio: '',
+      nombre: edit ? user.nombre : '',
+      apellido: edit ? user.apellido : '',
+      dni: edit ? user.dni : '',
+      email: edit ? user.email : '',
+      password: edit ? user.password : '',
+      fechaAlta: edit ? user.fechaAlta : '',
+      domicilio: edit ? user.domicilio : '',
     },
     validate,
-    onSubmit: values => {
-      console.log(values)
+    onSubmit: (values, { resetForm }) => {
+      if (edit) {
+        console.log('entraa')
+        axios
+          .put(
+            `http://localhost:4000/user/update/${user._id}`,
+            values
+          )
+          .then(resp => console.log(resp))
+          .catch(err => console.log(err))
+      }else{
+        axios
+          .post(
+            `http://localhost:4000/user`,
+            values
+          )
+          .then(resp => console.log(resp))
+          .catch(err => console.log(err))
+      }
     },
   })
   return (
     <Box
       width="100%"
-    //   height="100%"
       display="flex"
       justifyContent="center"
       alignItems="center"
@@ -116,7 +132,9 @@ const FormCreate = () => {
               value={formik.values.fechaAlta}
             />
             {formik.errors.fechaAlta && (
-              <Typography component="span">{formik.errors.fechaAlta}</Typography>
+              <Typography component="span">
+                {formik.errors.fechaAlta}
+              </Typography>
             )}
           </Box>
           <Box m={1}>
@@ -129,7 +147,9 @@ const FormCreate = () => {
               value={formik.values.domicilio}
             />
             {formik.errors.domicilio && (
-              <Typography component="span">{formik.errors.domicilio}</Typography>
+              <Typography component="span">
+                {formik.errors.domicilio}
+              </Typography>
             )}
           </Box>
           <Box m={1}>
@@ -145,25 +165,27 @@ const FormCreate = () => {
               <Typography component="span">{formik.errors.email}</Typography>
             )}
           </Box>
+          {!edit && (
+            <Box m={1}>
+              <TextInput
+                id="password"
+                label="Contraseña"
+                type="password"
+                name="password"
+                onChange={formik.handleChange}
+                value={formik.values.password}
+              />
+              {formik.errors.password && (
+                <Typography component="span">
+                  {formik.errors.password}
+                </Typography>
+              )}
+            </Box>
+          )}
           <Box m={1}>
-            <TextInput
-              id="contrasenia"
-              label="Contraseña"
-              type="password"
-              name="contrasenia"
-              onChange={formik.handleChange}
-              value={formik.values.contrasenia}
-            />
-            {formik.errors.contrasenia && (
-              <Typography component="span">
-                {formik.errors.contrasenia}
-              </Typography>
-            )}
-          </Box>
-          <Box m={1}>
-            <ButtonComponent type="submit" disabled={!formik.isValid}>
-              Crear
-            </ButtonComponent>
+            <Button color="primary" type="submit">
+              {edit ? 'Editar' : 'Crear'}
+            </Button>
           </Box>
         </Box>
       </form>

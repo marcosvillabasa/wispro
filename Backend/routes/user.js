@@ -3,7 +3,7 @@ const server = require('express').Router()
 const jwt = require('jsonwebtoken')
 const { verifyToken } = require('../middlewares/auth')
 
-server.post('/user', verifyToken, (req, res) => {
+server.post('/user', (req, res) => {
   const usuario = new User({
     nombre: req.body.nombre,
     apellido: req.body.apellido,
@@ -22,19 +22,19 @@ server.post('/user', verifyToken, (req, res) => {
     .catch(err => res.status(500).json({ ok: false, err }))
 })
 
-server.get('/users', verifyToken, (req, res) => {
+server.get('/users', (req, res) => {
   User.find({})
     .then(resp => res.json({ ok: true, users: resp }))
     .catch(err => res.status(500).json({ ok: false, err }))
 })
 
-server.get('/user/:id', verifyToken, (req, res) => {
+server.get('/user/:id', (req, res) => {
   User.findById(req.params.id)
     .then(resp => res.json({ ok: true, user: resp }))
     .catch(err => res.status(500).json({ ok: false, err }))
 })
 
-server.delete('/user/:id', verifyToken, (req, res) => {
+server.delete('/user/:id', (req, res) => {
   User.findByIdAndRemove(req.params.id)
     .then(user => {
       if (!user) {
@@ -53,7 +53,30 @@ server.delete('/user/:id', verifyToken, (req, res) => {
     })
 })
 
+server.put('/user/update/:id', (req, res) => {
+  console.log(req.params)
+  let user = {}
+  if (req.body.nombre) user.nombre = req.body.nombre
+  if (req.body.apellido) user.apellido = req.body.apellido
+  if (req.body.email) user.email = req.body.email
+  if (req.body.dni) user.dni = req.body.dni
+  if (req.body.domicilio) user.domicilio = req.body.domicilio
+
+  user = { $set: user }
+  User.update({ _id: req.params.id }, user)
+    .then((resp) => {
+      res.json({
+        ok:true,
+        resp
+      })
+    })
+    .catch(err => {
+      console.log(err)
+    })
+})
+
 server.post('/login', (req, res) => {
+  console.log(req.body)
   User.findOne({ email: req.body.email })
     .then(user => {
       if (user.password !== req.body.password) {

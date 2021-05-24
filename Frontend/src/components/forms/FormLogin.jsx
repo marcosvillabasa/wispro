@@ -1,5 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React from 'react'
 import { useFormik } from 'formik'
+import { useSelector, useDispatch } from 'react-redux'
+import { useHistory } from 'react-router'
+
+import { login } from '../../redux/actions/user'
 
 import { Box, Typography } from '@material-ui/core'
 
@@ -14,24 +19,30 @@ const validate = values => {
   } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
     errors.email = 'Email inválido'
   }
-  if (!values.contrasenia) {
-    errors.contrasenia = 'Contraseña es requerida'
-  } else if (values.contrasenia.length < 5) {
-    errors.contrasenia = 'Debe tener 5 caracteres'
+  if (!values.password) {
+    errors.password = 'Contraseña es requerida'
+  } else if (values.password.length < 5) {
+    errors.password = 'Debe tener 5 caracteres'
   }
 
   return errors
 }
 
 const FormLogin = () => {
+  const userLogin = useSelector(state => state.login.userLogin)
+  let history = useHistory()
+  const dispatch = useDispatch()
+
   const formik = useFormik({
     initialValues: {
       email: '',
-      contrasenia: '',
+      password: '',
     },
     validate,
-    onSubmit: values => {
-      console.log(values)
+    onSubmit: (values, {resetForm}) => {
+      dispatch(login(values.email, values.password))
+      if (userLogin.id !== null) history.push('/dashboard')
+      resetForm()
     },
   })
   return (
@@ -66,21 +77,21 @@ const FormLogin = () => {
           </Box>
           <Box m={1}>
             <TextInput
-              id="contrasenia"
+              id="password"
               label="Contraseña"
               type="password"
-              name="contrasenia"
+              name="password"
               onChange={formik.handleChange}
-              value={formik.values.contrasenia}
+              value={formik.values.password}
             />
-            {formik.errors.contrasenia && (
-              <Typography component="span">
-                {formik.errors.contrasenia}
-              </Typography>
+            {formik.errors.password && (
+              <Typography component="span">{formik.errors.password}</Typography>
             )}
           </Box>
           <Box m={1}>
-            <ButtonComponent type="submit" disabled={!formik.isValid}>Ingresar</ButtonComponent>
+            <ButtonComponent type="submit" disabled={!formik.isValid}>
+              Ingresar
+            </ButtonComponent>
           </Box>
         </Box>
       </form>

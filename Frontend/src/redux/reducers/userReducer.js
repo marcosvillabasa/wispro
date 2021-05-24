@@ -5,8 +5,8 @@ import {
   USER_LOGIN_SUCCESS,
 } from '../types'
 
-const userInfoStorage = localStorage.getItem('userInfo')
-  ? JSON.parse(localStorage.getItem('userInfo'))
+const userInfoStorage = localStorage.getItem('user')
+  ? JSON.parse(localStorage.getItem('user'))
   : null
 
 const initialState = {
